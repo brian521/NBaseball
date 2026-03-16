@@ -76,7 +76,11 @@ bool ANBGameModeBase::IsGuessNumberString(const FString& InNumberString)
 				break;
 			}
 
-			UniqueDigits.Add(C);
+			if (UniqueDigits.Add(C).IsValidId() == false)
+			{
+				bIsUnique = false;
+				break;
+			}
 		}
 
 		if (bIsUnique == false)
@@ -157,6 +161,7 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 			ANBPlayerController* NBPlayerController = *It;
 			if (IsValid(NBPlayerController) == true)
 			{
+				//TODO 다시입력하세요 안내 출력
 				NBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
 			}
 		}
