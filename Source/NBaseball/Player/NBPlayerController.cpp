@@ -46,6 +46,15 @@ void ANBPlayerController::BeginPlay()
 			NotificationTextWidgetInstance->AddToViewport();
 		}
 	}
+
+	if (IsValid(TimerTextWidgetClass) == true)
+	{
+		TimerTextWidgetInstance = CreateWidget<UUserWidget>(this, TimerTextWidgetClass);
+		if (IsValid(TimerTextWidgetInstance) == true)
+		{
+			TimerTextWidgetInstance->AddToViewport();
+		}
+	}
 }
 
 void ANBPlayerController::SetChatMessageString(const FString& InChatMessageString)
@@ -68,6 +77,14 @@ void ANBPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, NotificationText);
+}
+
+void ANBPlayerController::UpdateUI(int32 Time)
+{
+	if (TimerTextWidgetInstance)
+	{
+		TimerText = FText::Format(FText::FromString(TEXT("Time: {0}")), Time);
+	}
 }
 
 void ANBPlayerController::ServerRPCPrintChatMessageString_Implementation(const FString& InChatMessageString)

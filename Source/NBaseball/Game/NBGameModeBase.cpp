@@ -129,6 +129,8 @@ void ANBGameModeBase::BeginPlay()
 	Super::BeginPlay();
 
 	SecretNumberString = GenerateSecretNumber();
+
+	GetWorldTimerManager().SetTimer(TimerHandle, this, &ANBGameModeBase::UpdateTimer, 1.0f, true);
 }
 
 void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
@@ -262,5 +264,23 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 				ResetGame();
 			}
 		}
+	}
+}
+
+void ANBGameModeBase::UpdateTimer()
+{
+	ANBGameStateBase* NBGS = GetGameState<ANBGameStateBase>();
+	if (IsValid(NBGS))
+	{
+		CurrentTime--;
+
+		if (CurrentTime < 0)
+		{
+			CurrentTime = MaxTime;
+			// 필요하다면 여기서 게임 로직(새 라운드 시작 등)을 실행하세요.
+			//OnTimerReset();
+		}
+
+		NBGS->RemainingTime = CurrentTime;
 	}
 }

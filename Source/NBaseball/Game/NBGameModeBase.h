@@ -42,4 +42,10 @@ protected:
 
 	TArray<TObjectPtr<ANBPlayerController>> AllPlayerControllers;
 
+protected:
+	void UpdateTimer();
+
+	FTimerHandle TimerHandle;
+	int32 MaxTime = 10;
+	int32 CurrentTime = 10;
 };

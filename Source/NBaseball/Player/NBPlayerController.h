@@ -34,6 +34,8 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void UpdateUI(int32 Time);
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UNBChatInput> ChatInputWidgetClass;
@@ -49,7 +51,16 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UUserWidget> NotificationTextWidgetInstance;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> TimerTextWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> TimerTextWidgetInstance;
+
 public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	FText NotificationText;
+
+	UPROPERTY(Replicated, BlueprintReadOnly)
+	FText TimerText;
 };
