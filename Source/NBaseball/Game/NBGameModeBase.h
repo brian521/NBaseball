@@ -31,6 +31,8 @@ public:
 
 	void IncreaseGuessCount(ANBPlayerController* InChattingPlayerController);
 
+	FString CombinePlayerInfo(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString);
+
 	void ResetGame();
 
 	void JudgeGame(ANBPlayerController* InChattingPlayerController, int InStrikeCount);

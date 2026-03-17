@@ -54,13 +54,7 @@ void ANBPlayerController::SetChatMessageString(const FString& InChatMessageStrin
 
 	if (IsLocalController() == true)
 	{
-		ANBPlayerState* NBPS = GetPlayerState<ANBPlayerState>();
-		if (IsValid(NBPS) == true)
-		{
-			FString CombinedMessageString = NBPS->GetPlayerInfoString() + TEXT(": ") + InChatMessageString;
-
-			ServerRPCPrintChatMessageString(CombinedMessageString);
-		}
+		ServerRPCPrintChatMessageString(InChatMessageString);
 	}
 }
 

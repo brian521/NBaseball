@@ -141,13 +141,14 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
 
 		IncreaseGuessCount(InChattingPlayerController);
+		FString CombinedInfoString = CombinePlayerInfo(InChattingPlayerController, InChatMessageString);
 
 		for (TActorIterator<ANBPlayerController> It(GetWorld()); It; ++It)
 		{
 			ANBPlayerController* NBPlayerController = *It;
 			if (IsValid(NBPlayerController) == true)
 			{
-				FString CombinedMessageString = InChatMessageString + TEXT(" -> ") + JudgeResultString;
+				FString CombinedMessageString = CombinedInfoString + TEXT(" -> ") + JudgeResultString;
 				NBPlayerController->ClientRPCPrintChatMessageString(CombinedMessageString);
 
 				int32 StrikeCount = FCString::Atoi(*JudgeResultString.Left(1));
@@ -163,12 +164,14 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 			InChattingPlayerController->NotificationText = FText::FromString(TEXT("다시 입력하세요"));
 		}
 
+		FString CombinedInfoString = CombinePlayerInfo(InChattingPlayerController, InChatMessageString);
+
 		for (TActorIterator<ANBPlayerController> It(GetWorld()); It; ++It)
 		{
 			ANBPlayerController* NBPlayerController = *It;
 			if (IsValid(NBPlayerController) == true)
 			{
-				NBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
+				NBPlayerController->ClientRPCPrintChatMessageString(CombinedInfoString);
 			}
 		}
 	}
@@ -181,6 +184,18 @@ void ANBGameModeBase::IncreaseGuessCount(ANBPlayerController* InChattingPlayerCo
 	{
 		NBPS->CurrentGuessCount++;
 	}
+}
+
+FString ANBGameModeBase::CombinePlayerInfo(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
+{
+	ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState<ANBPlayerState>();
+	if (IsValid(NBPS) == true)
+	{
+		FString CombinedMessageString = NBPS->GetPlayerInfoString() + TEXT(": ") + InChatMessageString;
+
+		return CombinedMessageString;
+	}
+	return InChatMessageString;
 }
 
 void ANBGameModeBase::ResetGame()
