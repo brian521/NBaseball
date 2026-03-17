@@ -21,6 +21,8 @@ public:
 
 	FString GetPlayerInfoString();
 
+	bool IsGuessCountMax();
+
 public:
 	UPROPERTY(Replicated)
 	FString PlayerNameString;

@@ -133,10 +133,20 @@ void ANBGameModeBase::BeginPlay()
 
 void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
-	FString ChatMessageString = InChatMessageString;
+	ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState<ANBPlayerState>();
+	if (IsValid(NBPS) == true)
+	{
+		if (NBPS->IsGuessCountMax())
+		{
+			InChattingPlayerController->NotificationText = FText::FromString(TEXT("모든 기회를 소모하셨습니다"));
+			return;
+		}
+	}
+
 	int Index = InChatMessageString.Len() - 3;
 	FString GuessNumberString = InChatMessageString.RightChop(Index);
-	if (IsGuessNumberString(GuessNumberString) == true)
+
+	if (IsGuessNumberString(GuessNumberString) == true )
 	{
 		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
 
@@ -158,7 +168,6 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 	}
 	else
 	{
-		ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState<ANBPlayerState>();
 		if (IsValid(NBPS) == true)
 		{
 			InChattingPlayerController->NotificationText = FText::FromString(TEXT("다시 입력하세요"));

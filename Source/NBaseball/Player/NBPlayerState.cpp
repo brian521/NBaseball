@@ -27,3 +27,8 @@ FString ANBPlayerState::GetPlayerInfoString()
 	FString PlayerInfoString = PlayerNameString + TEXT("[") + FString::FromInt(CurrentGuessCount) + TEXT("/") + FString::FromInt(MaxGuessCount) + TEXT("]");
 	return PlayerInfoString;
 }
+
+bool ANBPlayerState::IsGuessCountMax()
+{
+	return CurrentGuessCount >= MaxGuessCount;
+}
