@@ -170,7 +170,7 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 	{
 		if (IsValid(NBPS) == true)
 		{
-			InChattingPlayerController->NotificationText = FText::FromString(TEXT("다시 입력하세요"));
+			InChattingPlayerController->NotificationText = FText::FromString(TEXT("중복되지 않은 3자리 숫자를 입력해주세요"));
 		}
 
 		FString CombinedInfoString = CombinePlayerInfo(InChattingPlayerController, InChatMessageString);
