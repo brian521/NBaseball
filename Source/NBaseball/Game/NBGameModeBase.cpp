@@ -66,24 +66,25 @@ bool ANBGameModeBase::IsGuessNumberString(const FString& InNumberString)
 			break;
 		}
 
+		bool bIsDigit = true;
 		bool bIsUnique = true;
 		TSet<TCHAR> UniqueDigits;
 		for (TCHAR C : InNumberString)
 		{
 			if (FChar::IsDigit(C) == false || C == '0')
 			{
-				bIsUnique = false;
+				bIsDigit = false;
 				break;
 			}
-
-			if (UniqueDigits.Add(C).IsValidId() == false)
-			{
-				bIsUnique = false;
-				break;
-			}
+			UniqueDigits.Add(C);
 		}
 
-		if (bIsUnique == false)
+		if (UniqueDigits.Num() != 3)
+		{
+			bIsUnique = false;
+		}
+
+		if (bIsDigit == false || bIsUnique == false)
 		{
 			break;
 		}
@@ -156,12 +157,17 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 	}
 	else
 	{
+		ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState<ANBPlayerState>();
+		if (IsValid(NBPS) == true)
+		{
+			InChattingPlayerController->NotificationText = FText::FromString(TEXT("다시 입력하세요"));
+		}
+
 		for (TActorIterator<ANBPlayerController> It(GetWorld()); It; ++It)
 		{
 			ANBPlayerController* NBPlayerController = *It;
 			if (IsValid(NBPlayerController) == true)
 			{
-				//TODO 다시입력하세요 안내 출력
 				NBPlayerController->ClientRPCPrintChatMessageString(InChatMessageString);
 			}
 		}
