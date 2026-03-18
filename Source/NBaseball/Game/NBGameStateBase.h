@@ -21,8 +21,20 @@ public:
 	UFUNCTION()
 	void OnRep_RemainingTime();
 
+	UFUNCTION()
+	void OnRep_CurrentPlayer();
+
+	UFUNCTION()
+	void OnRep_PlayerList();
+
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	UPROPERTY(ReplicatedUsing = OnRep_RemainingTime, BlueprintReadOnly, Category = "Timer")
+	UPROPERTY(ReplicatedUsing = OnRep_RemainingTime, BlueprintReadOnly, Category = "Turn")
 	int32 RemainingTime;
+
+	UPROPERTY(ReplicatedUsing = OnRep_CurrentPlayer, BlueprintReadOnly, Category = "Turn")
+	int32 CurrentPlayer = 0;
+
+	UPROPERTY(ReplicatedUsing = OnRep_PlayerList, BlueprintReadOnly, Category = "Turn")
+	TArray<FString> PlayerList;
 };

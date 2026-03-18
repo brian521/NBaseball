@@ -8,6 +8,8 @@
 #include "EngineUtils.h"
 #include "Player/NBPlayerState.h"
 
+#include "NBaseball.h"
+
 void ANBGameModeBase::OnPostLogin(AController* NewPlayer)
 {
 	Super::OnPostLogin(NewPlayer);
@@ -25,10 +27,11 @@ void ANBGameModeBase::OnPostLogin(AController* NewPlayer)
 			NBPS->PlayerNameString = TEXT("Player") + FString::FromInt(AllPlayerControllers.Num());
 		}
 
-		ANBGameStateBase* NBGameStateBase = GetGameState<ANBGameStateBase>();
-		if (IsValid(NBGameStateBase) == true)
+		ANBGameStateBase* NBGS = GetGameState<ANBGameStateBase>();
+		if (IsValid(NBGS) == true)
 		{
-			NBGameStateBase->MulticastRPCBroadcastLoginMessage(NBPS->PlayerNameString);
+			NBGS->MulticastRPCBroadcastLoginMessage(NBPS->PlayerNameString);
+			NBGS->PlayerList.Add(NBPS->PlayerNameString);
 		}
 	}
 }
@@ -135,6 +138,12 @@ void ANBGameModeBase::BeginPlay()
 
 void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlayerController, const FString& InChatMessageString)
 {
+	if (CurrentTurnPlayerIndex != AllPlayerControllers.Find(InChattingPlayerController))
+	{
+		InChattingPlayerController->NotificationText = FText::FromString(TEXT("현재 다른 플레이어의 턴입니다"));
+		return;
+	}
+
 	ANBPlayerState* NBPS = InChattingPlayerController->GetPlayerState<ANBPlayerState>();
 	if (IsValid(NBPS) == true)
 	{
@@ -152,9 +161,9 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 	{
 		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
 
-		IncreaseGuessCount(InChattingPlayerController);
+		PassTurn();
 		FString CombinedInfoString = CombinePlayerInfo(InChattingPlayerController, InChatMessageString);
-
+		
 		for (TActorIterator<ANBPlayerController> It(GetWorld()); It; ++It)
 		{
 			ANBPlayerController* NBPlayerController = *It;
@@ -247,7 +256,7 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 			ANBPlayerState* NBPS = NBPlayerController->GetPlayerState<ANBPlayerState>();
 			if (IsValid(NBPS) == true)
 			{
-				if (NBPS->CurrentGuessCount < NBPS->MaxGuessCount)
+				if (!NBPS->IsGuessCountMax())
 				{
 					bIsDraw = false;
 					break;
@@ -267,20 +276,33 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 	}
 }
 
+void ANBGameModeBase::PassTurn()
+{
+	IncreaseGuessCount(AllPlayerControllers[CurrentTurnPlayerIndex]);
+	CurrentTurnPlayerIndex++;
+	if (CurrentTurnPlayerIndex >= AllPlayerControllers.Num())
+	{
+		CurrentTurnPlayerIndex = 0;
+	}
+	CurrentTime = MaxTime;
+
+	ANBGameStateBase* NBGS = GetGameState<ANBGameStateBase>();
+	if (!IsValid(NBGS)) return;
+
+	NBGS->CurrentPlayer = CurrentTurnPlayerIndex;
+}
+
 void ANBGameModeBase::UpdateTimer()
 {
 	ANBGameStateBase* NBGS = GetGameState<ANBGameStateBase>();
-	if (IsValid(NBGS))
+	if (!IsValid(NBGS)) return;
+
+	CurrentTime--;
+
+	if (CurrentTime < 0)
 	{
-		CurrentTime--;
-
-		if (CurrentTime < 0)
-		{
-			CurrentTime = MaxTime;
-			// 필요하다면 여기서 게임 로직(새 라운드 시작 등)을 실행하세요.
-			//OnTimerReset();
-		}
-
-		NBGS->RemainingTime = CurrentTime;
+		PassTurn();
 	}
+
+	NBGS->RemainingTime = CurrentTime;
 }

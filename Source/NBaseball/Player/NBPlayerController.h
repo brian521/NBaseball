@@ -8,6 +8,7 @@
 
 class UNBChatInput;
 class UUserWidget;
+class UVerticalBox;
 
 /**
  * 
@@ -34,7 +35,9 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void UpdateUI(int32 Time);
+	void UpdateTimeUI(int32 Time);
+
+	void UpdatePlayerUI(TArray<FString> PlayerList, int32 PlayerIndex);
 
 protected:
 	UPROPERTY(EditDefaultsOnly)
@@ -57,10 +60,26 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UUserWidget> TimerTextWidgetInstance;
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> PlayerTextWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> PlayerTextWidgetInstance;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UUserWidget> ChattingTextWidgetClass;
+
+	UPROPERTY()
+	TObjectPtr<UUserWidget> ChattingTextWidgetInstance;
+
 public:
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	FText NotificationText;
 
 	UPROPERTY(Replicated, BlueprintReadOnly)
 	FText TimerText;
+
+protected:
+	UVerticalBox* PlayerListBox;
+	UVerticalBox* ChattingBox;
 };

@@ -42,10 +42,15 @@ protected:
 
 	TArray<TObjectPtr<ANBPlayerController>> AllPlayerControllers;
 
+
+public:
+	void PassTurn();
+
 protected:
 	void UpdateTimer();
 
 	FTimerHandle TimerHandle;
-	int32 MaxTime = 10;
-	int32 CurrentTime = 10;
+	int32 MaxTime = 15;
+	int32 CurrentTime = 15;
+	int32 CurrentTurnPlayerIndex = 0;
 };

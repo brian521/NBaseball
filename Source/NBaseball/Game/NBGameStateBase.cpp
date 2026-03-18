@@ -32,7 +32,33 @@ void ANBGameStateBase::OnRep_RemainingTime()
 		ANBPlayerController* NBPC = Cast<ANBPlayerController>(PC);
 		if (IsValid(NBPC) == true)
 		{
-			NBPC->UpdateUI(RemainingTime);
+			NBPC->UpdateTimeUI(RemainingTime);
+		}
+	}
+}
+
+void ANBGameStateBase::OnRep_CurrentPlayer()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (IsValid(PC) == true)
+	{
+		ANBPlayerController* NBPC = Cast<ANBPlayerController>(PC);
+		if (IsValid(NBPC) == true)
+		{
+			NBPC->UpdatePlayerUI(PlayerList, CurrentPlayer);
+		}
+	}
+}
+
+void ANBGameStateBase::OnRep_PlayerList()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (IsValid(PC) == true)
+	{
+		ANBPlayerController* NBPC = Cast<ANBPlayerController>(PC);
+		if (IsValid(NBPC) == true)
+		{
+			NBPC->UpdatePlayerUI(PlayerList, CurrentPlayer);
 		}
 	}
 }
@@ -42,4 +68,6 @@ void ANBGameStateBase::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, RemainingTime);
+	DOREPLIFETIME(ThisClass, CurrentPlayer);
+	DOREPLIFETIME(ThisClass, PlayerList);
 }
