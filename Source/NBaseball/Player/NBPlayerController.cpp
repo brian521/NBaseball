@@ -129,6 +129,20 @@ void ANBPlayerController::GetLifetimeReplicatedProps(TArray<class FLifetimePrope
 	DOREPLIFETIME(ThisClass, NotificationText);
 }
 
+void ANBPlayerController::Client_StartNotificationTimer_Implementation(float Time)
+{
+	GetWorldTimerManager().ClearTimer(NotificationTimerHandle);
+	GetWorldTimerManager().SetTimer(NotificationTimerHandle, this, &ANBPlayerController::ClearNotificationText, Time, false);
+}
+
+void ANBPlayerController::ClearNotificationText()
+{
+	if (NotificationTextWidgetInstance)
+	{
+		NotificationText = FText::FromString(TEXT(""));
+	}
+}
+
 void ANBPlayerController::UpdateTimeUI(int32 Time)
 {
 	if (TimerTextWidgetInstance)
