@@ -18,6 +18,7 @@ void ANBGameModeBase::OnPostLogin(AController* NewPlayer)
 	if (IsValid(NBPlayerController) == true)
 	{
 		NBPlayerController->NotificationText = FText::FromString(TEXT("Connected to the game server."));
+		NBPlayerController->Client_StartNotificationTimer(3.f);
 
 		AllPlayerControllers.Add(NBPlayerController);
 
@@ -141,6 +142,8 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 	if (CurrentTurnPlayerIndex != AllPlayerControllers.Find(InChattingPlayerController))
 	{
 		InChattingPlayerController->NotificationText = FText::FromString(TEXT("현재 다른 플레이어의 턴입니다"));
+		InChattingPlayerController->Client_StartNotificationTimer(3.f);
+
 		return;
 	}
 
@@ -150,6 +153,7 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 		if (NBPS->IsGuessCountMax())
 		{
 			InChattingPlayerController->NotificationText = FText::FromString(TEXT("모든 기회를 소모하셨습니다"));
+			InChattingPlayerController->Client_StartNotificationTimer(3.f);
 			return;
 		}
 	}
@@ -161,7 +165,7 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 	{
 		FString JudgeResultString = JudgeResult(SecretNumberString, GuessNumberString);
 
-		PassTurn();
+		IncreaseGuessCount(InChattingPlayerController);
 		FString CombinedInfoString = CombinePlayerInfo(InChattingPlayerController, InChatMessageString);
 		
 		for (TActorIterator<ANBPlayerController> It(GetWorld()); It; ++It)
@@ -173,15 +177,20 @@ void ANBGameModeBase::PrintChatMessageString(ANBPlayerController* InChattingPlay
 				NBPlayerController->ClientRPCPrintChatMessageString(CombinedMessageString);
 
 				int32 StrikeCount = FCString::Atoi(*JudgeResultString.Left(1));
-				JudgeGame(InChattingPlayerController, StrikeCount);
+				if (!CheckWin(InChattingPlayerController, StrikeCount))
+				{
+					CheckDraw();
+				}
 			}
 		}
+		PassTurn(false);
 	}
 	else
 	{
 		if (IsValid(NBPS) == true)
 		{
 			InChattingPlayerController->NotificationText = FText::FromString(TEXT("중복되지 않은 3자리 숫자를 입력해주세요"));
+			InChattingPlayerController->Client_StartNotificationTimer(3.f);
 		}
 
 		FString CombinedInfoString = CombinePlayerInfo(InChattingPlayerController, InChatMessageString);
@@ -232,7 +241,7 @@ void ANBGameModeBase::ResetGame()
 	}
 }
 
-void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController, int InStrikeCount)
+bool ANBGameModeBase::CheckWin(ANBPlayerController* InChattingPlayerController, int InStrikeCount)
 {
 	if (3 == InStrikeCount)
 	{
@@ -243,42 +252,56 @@ void ANBGameModeBase::JudgeGame(ANBPlayerController* InChattingPlayerController,
 			{
 				FString CombinedMessageString = NBPS->PlayerNameString + TEXT(" has won the game.");
 				NBPlayerController->NotificationText = FText::FromString(CombinedMessageString);
+				NBPlayerController->Client_StartNotificationTimer(3.f);
+			}
+		}
 
-				ResetGame();
+		ResetGame();
+
+		return true;
+	}
+
+	return false;
+}
+
+void ANBGameModeBase::CheckDraw()
+{
+	bool bIsDraw = true;
+	for (const auto& NBPlayerController : AllPlayerControllers)
+	{
+		ANBPlayerState* NBPS = NBPlayerController->GetPlayerState<ANBPlayerState>();
+		if (IsValid(NBPS) == true)
+		{
+			if (!NBPS->IsGuessCountMax())
+			{
+				bIsDraw = false;
+				break;
 			}
 		}
 	}
-	else
+
+	if (true == bIsDraw)
 	{
-		bool bIsDraw = true;
 		for (const auto& NBPlayerController : AllPlayerControllers)
 		{
-			ANBPlayerState* NBPS = NBPlayerController->GetPlayerState<ANBPlayerState>();
-			if (IsValid(NBPS) == true)
-			{
-				if (!NBPS->IsGuessCountMax())
-				{
-					bIsDraw = false;
-					break;
-				}
-			}
-		}
-
-		if (true == bIsDraw)
-		{
-			for (const auto& NBPlayerController : AllPlayerControllers)
+			if (IsValid(NBPlayerController) == true)
 			{
 				NBPlayerController->NotificationText = FText::FromString(TEXT("Draw..."));
-
-				ResetGame();
+				NBPlayerController->Client_StartNotificationTimer(3.f);
 			}
 		}
+		ResetGame();
 	}
 }
 
-void ANBGameModeBase::PassTurn()
+void ANBGameModeBase::PassTurn(bool IsTimeOver)
 {
-	IncreaseGuessCount(AllPlayerControllers[CurrentTurnPlayerIndex]);
+	if(IsTimeOver)
+	{
+		IncreaseGuessCount(AllPlayerControllers[CurrentTurnPlayerIndex]);
+		CheckDraw();
+	}
+
 	CurrentTurnPlayerIndex++;
 	if (CurrentTurnPlayerIndex >= AllPlayerControllers.Num())
 	{
@@ -301,7 +324,7 @@ void ANBGameModeBase::UpdateTimer()
 
 	if (CurrentTime < 0)
 	{
-		PassTurn();
+		PassTurn(true);
 	}
 
 	NBGS->RemainingTime = CurrentTime;

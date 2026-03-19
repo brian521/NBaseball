@@ -35,6 +35,11 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UFUNCTION(Client, Reliable)
+	void Client_StartNotificationTimer(float Time);
+
+	void ClearNotificationText();
+
 	void UpdateTimeUI(int32 Time);
 
 	void UpdatePlayerUI(TArray<FString> PlayerList, int32 PlayerIndex);
@@ -80,6 +85,8 @@ public:
 	FText TimerText;
 
 protected:
+	FTimerHandle NotificationTimerHandle;
+
 	UVerticalBox* PlayerListBox;
 	UVerticalBox* ChattingBox;
 };

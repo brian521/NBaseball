@@ -35,7 +35,9 @@ public:
 
 	void ResetGame();
 
-	void JudgeGame(ANBPlayerController* InChattingPlayerController, int InStrikeCount);
+	bool CheckWin(ANBPlayerController* InChattingPlayerController, int InStrikeCount);
+
+	void CheckDraw();
 
 protected:
 	FString SecretNumberString;
@@ -44,7 +46,7 @@ protected:
 
 
 public:
-	void PassTurn();
+	void PassTurn(bool IsTimeOver);
 
 protected:
 	void UpdateTimer();
